@@ -1,0 +1,45 @@
+name: Sync Structure to Second Repo
+
+on:
+  push:
+    branches:
+      - main  # তোমার main branch অনুযায়ী adjust করো
+    paths-ignore:
+      - '.github/**'  # workflow changes ignore করবে
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout first repo
+      uses: actions/checkout@v3
+
+    - name: Prepare empty structure
+      run: |
+        # temporary folder বানাও
+        mkdir -p temp_repo
+        # ফোল্ডার structure copy করো, ফাইল খালি রাখো
+        rsync -av --include '*/' --include '*.html' --exclude '*' ./ temp_repo/
+        find temp_repo -type f -exec sh -c 'echo > "$1"' _ {} \;
+
+    - name: Clone second repo
+      uses: actions/checkout@v3
+      with:
+        repository: othersott/redirect-1  # এখানে তোমার second repo নাম দাও
+        token: ${{ secrets.SECOND_REPO_TOKEN }}
+        path: second_repo
+
+    - name: Copy structure to second repo
+      run: |
+        # temp_repo এর content second_repo তে copy করো
+        rsync -av --delete temp_repo/ second_repo/
+
+    - name: Commit and push changes
+      run: |
+        cd second_repo
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add .
+        git commit -m "Sync structure from first repo" || echo "No changes to commit"
+        git push origin main
