@@ -1,0 +1,35 @@
+name: Copy Folder Structure Only
+
+on:
+  push:
+    paths:
+      - '**/*'        # সব ফাইল/ফোল্ডার change হলে trigger হবে
+      - '!README.md'  # Optional: কোনো exclude করতে চাইলে
+  workflow_dispatch:   # ম্যানুয়ালি রান করার জন্য
+
+jobs:
+  copy-structure:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source repo
+      uses: actions/checkout@v3
+
+    - name: Prepare folder structure
+      run: |
+        mkdir ../temp-structure
+        find . -type d -exec mkdir -p ../temp-structure/{} \;
+        find . -type f -exec touch ../temp-structure/{} \;
+        # remove the .git folder in temp structure
+        rm -rf ../temp-structure/.git
+
+    - name: Push to destination repo
+      env:
+        DEST_REPO: https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/othersott/redirect-1.git
+      run: |
+        cd ../temp-structure
+        git init
+        git checkout -b main
+        git add .
+        git commit -m "Update folder structure from file-1"
+        git push --force $DEST_REPO main
