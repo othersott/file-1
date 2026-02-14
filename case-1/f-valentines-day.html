@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Movie Download and Streaming Interface">
+    <title>Movie Stream & Download</title>
+    
+    <!-- Google Fonts: Roboto & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <style>
+        /* =========================================
+           CSS VARIABLES & THEME SETUP
+           ========================================= */
+        :root {
+            /* Material Design 3 Tokens - Dark Mode (Default) */
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
+            --md-sys-color-secondary: #CCC2DC;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+            --md-sys-color-tertiary: #EFB8C8;
+            --md-sys-color-surface: #141218;
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-surface-variant: #49454F;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            --md-sys-color-outline: #938F99;
+            --md-sys-color-outline-variant: #49454F;
+            --md-sys-color-background: #141218;
+            --md-sys-color-on-background: #E6E1E5;
+            --md-sys-color-error: #F2B8B5;
+            --md-sys-color-on-error: #601410;
+
+            /* Spacing & Layout */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+            --font-family: 'Roboto', sans-serif;
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="light"] {
+            /* Material Design 3 Tokens - Light Mode */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1D1B20;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #CAC4D0;
+            --md-sys-color-background: #FEF7FF;
+            --md-sys-color-on-background: #1D1B20;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+        }
+
+        /* =========================================
+           RESET & BASE STYLES
+           ========================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            line-height: 1.5;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        button { cursor: pointer; border: none; font-family: inherit; }
+
+        .material-symbols-outlined {
+            font-size: 20px;
+            vertical-align: middle;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        /* =========================================
+           COMPONENT: THEME SWITCH
+           ========================================= */
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .theme-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--md-sys-color-surface-variant);
+            transition: .4s;
+            border-radius: 34px;
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--md-sys-color-on-surface-variant);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .theme-switch input:checked + .slider {
+            background-color: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .theme-switch input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: var(--md-sys-color-on-primary);
+        }
+
+        /* =========================================
+           COMPONENT: SKELETON LOADING
+           ========================================= */
+        .skeleton {
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+            color: transparent !important;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.3; }
+        }
+
+        /* =========================================
+           LAYOUT: HEADER
+           ========================================= */
+        header {
+            padding: var(--spacing-lg) 0 var(--spacing-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--spacing-md);
+        }
+
+        .header-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .movie-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--md-sys-color-on-surface);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            flex-shrink: 0; 
+        }
+
+        .share-btn {
+            background: transparent;
+            color: var(--md-sys-color-primary);
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .share-btn:hover { background-color: rgba(128,128,128,0.1); }
+
+        /* =========================================
+           LAYOUT: MOVIE DETAILS
+           ========================================= */
+        .movie-details-section {
+            display: grid;
+            grid-template-columns: 320px 1fr; 
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            background-color: var(--md-sys-color-surface);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        .poster-wrapper {
+            width: 100%;
+            aspect-ratio: 16/9; 
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background-color: var(--md-sys-color-surface-variant);
+            position: relative;
+        }
+
+        .poster-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            transition: transform 0.3s;
+        }
+        
+        .meta-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .meta-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-xs);
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            font-weight: 500;
+        }
+
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 4px;
+        }
+
+        .overview {
+            margin-top: var(--spacing-sm);
+            font-size: 0.9rem;
+            color: var(--md-sys-color-on-surface-variant);
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* =========================================
+           LAYOUT: STREAMING SECTION
+           ========================================= */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .stream-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background-color: #000;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .stream-container iframe, 
+        .stream-container .embed-placeholder {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
+        }
+
+        /* =========================================
+           LAYOUT: DOWNLOAD SECTION
+           ========================================= */
+        .download-grid {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .quality-group {
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: background-color 0.2s;
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .quality-btn {
+            width: 100%;
+            padding: 12px var(--spacing-md);
+            background-color: transparent;
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        .quality-btn:hover { background-color: rgba(255,255,255,0.05); }
+        .quality-btn .chevron { transition: transform 0.3s; }
+        
+        .quality-group.open .chevron { transform: rotate(180deg); }
+        .quality-group.open { 
+            background-color: var(--md-sys-color-primary-container);
+            border-color: var(--md-sys-color-primary-container); 
+        }
+        .quality-group.open .quality-btn { color: var(--md-sys-color-on-primary-container); }
+
+        .source-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: var(--md-sys-color-surface);
+            border-top: 1px solid var(--md-sys-color-outline); 
+        }
+
+        .source-list a {
+            display: block;
+            padding: 12px var(--spacing-md);
+            font-size: 0.9rem;
+            color: var(--md-sys-color-on-surface);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant); 
+            transition: background-color 0.2s;
+        }
+        
+        .source-list a:last-child { border-bottom: none; }
+        .source-list a:hover { background-color: var(--md-sys-color-secondary-container); }
+
+        /* =========================================
+           LAYOUT: REPORT CALLOUT
+           ========================================= */
+        .report-box {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .report-box p { font-style: italic; font-size: 0.9rem; margin-bottom: var(--spacing-xs); }
+
+        .report-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+
+        .btn-text {
+            background: rgba(255,255,255,0.1);
+            color: inherit;
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-text:hover { background: rgba(255,255,255,0.2); }
+
+        /* =========================================
+           LAYOUT: FOOTER
+           ========================================= */
+        footer {
+            margin-top: auto;
+            padding: var(--spacing-md) 0;
+            text-align: center;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            font-size: 0.85rem;
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+        
+        .footer-link {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .footer-link:hover { opacity: 1; }
+
+        /* =========================================
+           TOAST NOTIFICATION
+           ========================================= */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--md-sys-color-on-surface);
+            color: var(--md-sys-color-surface);
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            z-index: 200;
+            white-space: nowrap;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* =========================================
+           RESPONSIVE ADJUSTMENTS
+           ========================================= */
+        @media (max-width: 768px) {
+            .movie-details-section {
+                grid-template-columns: 1fr; 
+                justify-items: center;
+                text-align: center;
+            }
+
+            .poster-wrapper { 
+                width: 100%; 
+                max-width: 100%; 
+            }
+
+            .meta-tags { justify-content: center; }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-controls {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1 class="movie-title skeleton" id="movieTitle">Loading Movie...</h1>
+            </div>
+
+            <div class="header-controls">
+                <!-- Theme Toggle Switch -->
+                <label class="theme-switch" aria-label="Toggle Theme">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider"></span>
+                </label>
+
+                <!-- Share Button -->
+                <button class="share-btn" id="shareBtn" aria-label="Share">
+                    <span class="material-symbols-outlined">share</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Movie Details -->
+            <section class="movie-details-section">
+                <div class="poster-wrapper skeleton" id="posterWrapper">
+                    <img id="moviePoster" src="" alt="Movie Poster" style="display:none;">
+                </div>
+                
+                <div class="meta-info">
+                    <div class="rating-badge skeleton">
+                        <span class="material-symbols-outlined">star</span>
+                        <span id="movieRating">0.0</span>
+                    </div>
+                    
+                    <h2 class="skeleton" id="movieTitleSmall">Title</h2>
+                    
+                    <div class="meta-tags" id="metaTags">
+                        <!-- Tags injected here -->
+                        <span class="tag skeleton">Year</span>
+                        <span class="tag skeleton">Runtime</span>
+                        <span class="tag skeleton">Lang</span>
+                    </div>
+
+                    <p class="overview skeleton" id="movieOverview">
+                        Overview description goes here...
+                    </p>
+                </div>
+            </section>
+
+            <!-- Streaming Section -->
+            <section>
+                <h3 class="section-title">Watch Online</h3>
+                <div class="stream-container" id="streamContainer">
+                    <!-- Iframe injected here -->
+                    <div class="embed-placeholder skeleton"></div>
+                </div>
+            </section>
+
+            <!-- Download Section -->
+            <section>
+                <h3 class="section-title">Download</h3>
+                <div class="download-grid" id="downloadSection">
+                    <!-- Buttons injected via JS -->
+                </div>
+            </section>
+
+            <!-- Report / Callout Section -->
+            <section class="report-box">
+                <p>"If any link is broken or not working, please report it."</p>
+                <div class="report-actions">
+                    <button class="btn-text" id="copyPageLinkBtn">
+                        <span class="material-symbols-outlined">link</span> Copy Page Link
+                    </button>
+                    <a href="#" target="_blank" class="btn-text" id="telegramBotBtn">
+                        <span class="material-symbols-outlined">smart_toy</span> Report via Bot
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <span id="footerCopyright">© 2023 MyChannel</span>
+            <a href="#" target="_blank" class="footer-link" id="telegramChannelBtn">
+                <span class="material-symbols-outlined">telegram</span>
+            </a>
+        </footer>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Link copied to clipboard!</div>
+
+    <script>
+        /* =========================================
+           CONFIGURATION SECTION
+           ========================================= */
+        const CONFIG = {
+            // TMDB Configuration
+            tmdbApiKey: 'dd298cdb95858d0727d037e7ea0f1f35', // Paste your TMDB API Key here.
+            defaultTmdbUrl: 'https://www.themoviedb.org/movie/1429605-f-valentine-s-day',
+            defaultLanguage: 'Hindi', 
+
+            // Share Configuration
+            shareUrl: 'https://t.me/others_ott', 
+
+            // Streaming Configuration
+            embedCode: '<iframe src="https://streamtape.com/e/pDZzDKBa6otr9QO/" width="800" height="600" allowfullscreen allowtransparency allow="autoplay" scrolling="no" frameborder="0"></iframe>',
+
+            // ============================================================
+            // CUSTOM POSTER CONFIGURATION (EDIT HERE)
+            // ============================================================
+            // Paste your direct image link inside the quotes below.
+            // Example: 'https://example.com/my-image.jpg'
+            customPosterUrl: 'https://image.tmdb.org/t/p/original/nQJAsPs49y7m1lzVWQyha93yI9X.jpg', 
+            // ============================================================
+
+            // Download Sources Configuration
+            downloads: {
+                '1080p': [
+                    { label: 'GD FLIX (1.59 GB)', url: 'https://new14.gdflix.net/file/AnOXj9ygqf7q17C' },
+                    { label: 'HUB CLOUD (1.59 GB)', url: 'https://hubcloud.foo/drive/wnazlly61au91wd' }
+                ],
+                '720p': [
+                    { label: 'GD FLIX (876.93 MB)', url: 'https://new14.gdflix.net/file/opLO75F5XZWchNY' },
+                    { label: 'HUB CLOUD (876.93 MB)', url: 'https://hubcloud.foo/drive/kvsyqd8a2jgu1bu' }
+                ],
+                '480p': [
+                    { label: 'GD FLIX (248.51 MB)', url: 'https://new14.gdflix.net/file/qiJ9I6cKQfgwfqk' },
+                    { label: 'HUB CLOUD (248.51 MB)', url: 'https://hubcloud.foo/drive/inbmiqqlil0yeil' }
+                ]
+            },
+
+            // Telegram Links
+            telegramBotLink: 'https://t.me/OthersOTTInfoBot',
+            telegramChannelLink: 'https://t.me/others_ott',
+
+            // Footer Text
+            copyrightText: '© 2023 OTHERS OTT',
+            
+            // Image Config (Used as fallback if customPosterUrl is empty)
+            imageBaseUrl: 'https://image.tmdb.org/t/p/w500'
+        };
+
+        /* =========================================
+           LOGIC & INTERACTION
+           ========================================= */
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            loadMovieData();
+            setupEventListeners();
+        });
+
+        // 1. Theme Handling
+        function initTheme() {
+            const toggleSwitch = document.getElementById('themeToggle');
+            const html = document.documentElement;
+            
+            toggleSwitch.addEventListener('change', (e) => {
+                const isLight = e.target.checked;
+                const newTheme = isLight ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+            });
+        }
+
+        // 2. Data Loading & Parsing
+        async function loadMovieData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tmdbParam = urlParams.get('tmdb');
+            
+            const targetUrl = tmdbParam ? `https://www.themoviedb.org/movie/${tmdbParam}` : CONFIG.defaultTmdbUrl;
+            const match = targetUrl.match(/\/movie\/(\d+)/);
+            const movieId = match ? match[1] : null;
+
+            if (movieId && CONFIG.tmdbApiKey) {
+                await fetchFromTMDB(movieId);
+            } else {
+                console.warn("Using fallback data. Check API Key or URL.");
+                loadFallbackData(movieId || "27205"); 
+            }
+        }
+
+        async function fetchFromTMDB(id) {
+            try {
+                const response = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${CONFIG.tmdbApiKey}&append_to_response=credits`);
+                if (!response.ok) throw new Error('TMDB API Error');
+                const data = await response.json();
+                updateUI(data);
+            } catch (error) {
+                console.error("Fetch failed:", error);
+                showToast("Failed to load movie data. Using fallback.");
+                loadFallbackData(id);
+            }
+        }
+
+        function loadFallbackData(id) {
+            const fallbackData = {
+                title: "Inception",
+                vote_average: 8.8,
+                release_date: "2010-07-16",
+                runtime: 148,
+                overview: "Cobb steals information from his targets by entering their dreams. He is offered a chance to have his criminal history erased as payment for the implantation of another person's idea into a target's subconscious.",
+                poster_path: "/9gk7admal4zl67YrxIo2AO08qX8.jpg",
+                genres: [{name: "Action"}, {name: "Sci-Fi"}],
+                spoken_languages: [{ english_name: CONFIG.defaultLanguage }],
+                credits: { crew: [{ name: "Christopher Nolan", job: "Director" }] }
+            };
+            updateUI(fallbackData);
+        }
+
+        // 3. UI Updates
+        function updateUI(data) {
+            document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+
+            setTitle(data.title);
+            document.getElementById('movieRating').textContent = data.vote_average ? data.vote_average.toFixed(1) : 'N/A';
+            document.getElementById('movieTitleSmall').textContent = data.title;
+            document.getElementById('movieOverview').textContent = data.overview || "No description available.";
+
+            const tagsContainer = document.getElementById('metaTags');
+            tagsContainer.innerHTML = ''; 
+            
+            const releaseYear = data.release_date ? data.release_date.split('-')[0] : 'N/A';
+            const runtime = data.runtime ? `${data.runtime} min` : 'N/A';
+            const director = data.credits?.crew.find(c => c.job === "Director")?.name || "Unknown";
+            const language = data.spoken_languages?.length > 0 
+                             ? data.spoken_languages[0].english_name 
+                             : CONFIG.defaultLanguage;
+
+            createTag(tagsContainer, releaseYear);
+            createTag(tagsContainer, runtime);
+            createTag(tagsContainer, language);
+            createTag(tagsContainer, director);
+
+            const posterEl = document.getElementById('moviePoster');
+            const posterWrapper = document.getElementById('posterWrapper');
+            
+            // ============================================
+            // UPDATED POSTER LOGIC: CHECK CONFIG FIRST
+            // ============================================
+            if (CONFIG.customPosterUrl) {
+                // 1. Load from Config if provided
+                posterEl.src = CONFIG.customPosterUrl;
+                posterEl.style.display = 'block';
+                posterWrapper.classList.remove('skeleton');
+            } else if (data.poster_path) {
+                // 2. Fallback to TMDB if Config is empty
+                posterEl.src = CONFIG.imageBaseUrl.replace('w500', 'w780') + data.poster_path;
+                posterEl.style.display = 'block';
+                posterWrapper.classList.remove('skeleton');
+            } else {
+                // 3. Placeholder if nothing found
+                posterWrapper.style.backgroundColor = 'var(--md-sys-color-outline-variant)';
+                posterWrapper.innerHTML = '<span class="material-symbols-outlined" style="font-size:48px; color:#fff; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);">movie</span>';
+            }
+
+            const streamContainer = document.getElementById('streamContainer');
+            streamContainer.innerHTML = CONFIG.embedCode;
+        }
+
+        function setTitle(title) {
+            document.getElementById('movieTitle').textContent = title;
+            document.title = title + " - Download & Stream";
+        }
+
+        function createTag(container, text) {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.textContent = text;
+            container.appendChild(span);
+        }
+
+        // 4. Dynamic Download Buttons
+        function setupDownloads() {
+            const container = document.getElementById('downloadSection');
+            
+            for (const [quality, sources] of Object.entries(CONFIG.downloads)) {
+                const group = document.createElement('div');
+                group.className = 'quality-group';
+
+                const btn = document.createElement('button');
+                btn.className = 'quality-btn';
+                btn.innerHTML = `
+                    <span>${quality}</span>
+                    <span class="material-symbols-outlined chevron">expand_more</span>
+                `;
+                
+                const list = document.createElement('div');
+                list.className = 'source-list';
+
+                sources.forEach(source => {
+                    const link = document.createElement('a');
+                    link.href = source.url;
+                    link.textContent = source.label;
+                    link.target = "_blank";
+                    link.rel = "noopener noreferrer";
+                    list.appendChild(link);
+                });
+
+                btn.addEventListener('click', () => {
+                    const isOpen = group.classList.contains('open');
+                    
+                    if (!isOpen) {
+                        group.classList.add('open');
+                        list.style.maxHeight = list.scrollHeight + "px";
+                    } else {
+                        group.classList.remove('open');
+                        list.style.maxHeight = "0px";
+                    }
+                });
+
+                group.appendChild(btn);
+                group.appendChild(list);
+                container.appendChild(group);
+            }
+        }
+
+        // 5. Event Listeners & Utilities
+        function setupEventListeners() {
+            setupDownloads();
+
+            document.getElementById('footerCopyright').textContent = CONFIG.copyrightText;
+            document.getElementById('telegramChannelBtn').href = CONFIG.telegramChannelLink;
+            document.getElementById('telegramBotBtn').href = CONFIG.telegramBotLink;
+
+            const shareBtn = document.getElementById('shareBtn');
+            shareBtn.addEventListener('click', async () => {
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: document.title,
+                            text: `Check out ${document.getElementById('movieTitle').textContent}`,
+                            url: CONFIG.shareUrl
+                        });
+                    } catch (err) { console.log('Share canceled'); }
+                } else {
+                    navigator.clipboard.writeText(CONFIG.shareUrl);
+                    showToast("Link copied to clipboard!");
+                }
+            });
+
+            document.getElementById('copyPageLinkBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showToast("Page URL copied!");
+                });
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+    </script>
+</body>
+</html>
